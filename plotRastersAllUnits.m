@@ -71,7 +71,7 @@ for p = 1:nprobes
     text(resp_text_loc,1.01,'move','HorizontalAlignment','center','Units','normalized')
     text(tone_text_loc,1.01,'tone','HorizontalAlignment','center','Units','normalized')
     xlabel('Time (seconds)')
-    ylabel('Trial')
+    ylabel('Unit')
 end
 
 end
