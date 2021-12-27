@@ -24,7 +24,11 @@ num_units = length(valid_units);
 before_time = 0;
 after_time = 1 +feedback_time;
 
+%get unit depth (0 = deepest, 3820 = shallowest; scale um)
+depths_all = nwb_file.units.vectordata.get('cluster_depths').data(:);
+
 raster_data = {};
+depth_unit = zeros(1,num_units);
 probe_prov = zeros(1,num_units);
 
 for n = 1:num_units
@@ -34,6 +38,7 @@ for n = 1:num_units
     probe = probe_path(slash_idx(end)+1:end);
     idxC = strfind(probe_list,probe);
     probe_prov(n) = find(not(cellfun('isempty',idxC)));
+    depth_unit(n) = depths_all(valid_units(n));
 
     % get spike times
     spike_times = util.read_indexed_column(nwb_file.units.spike_times_index, ...
@@ -44,34 +49,39 @@ for n = 1:num_units
                        spike_times <= trial_start_time + after_time) - ...
                        trial_start_time;
 end
-
-
+% make figure
+min_depth = 0;% microns
+max_depth = 3820;% microns
 figure;
 for p = 1:nprobes
     probe_idxs = find(probe_prov==p);
     subplot(nprobes, 1, p)
     hold on
-    counter = 0;
+    % make raster plot
     for i = 1:length(probe_idxs)
         row_data = raster_data{probe_idxs(i)};
-        counter = counter + 0.2;
-        plot(row_data, ones(length(row_data),1) * counter, '.', ...
+        row_loc = depth_unit(probe_idxs(i));
+        plot(row_data, ones(length(row_data),1) * row_loc, '.', ...
             'Color','#add8e6')
     end
+    % set and get axis limit
     xlim([before_time after_time])
+    ylim([min_depth max_depth])
     yl = ylim();
     xl = xlim();
+    % mark and label time points
     stim_text_loc = (stim_time-xl(1))/(xl(2)-xl(1));
     resp_text_loc = (response_time-xl(1))/(xl(2)-xl(1));
     tone_text_loc = (tone_time-xl(1))/(xl(2)-xl(1));
-
-    title(probe_list(p),'Units', 'normalized','Position',[0.5 1.05 0]) 
     xline([stim_time response_time tone_time feedback_time])
     text(stim_text_loc,1.01,'stim','HorizontalAlignment','center','Units','normalized')
     text(resp_text_loc,1.01,'move','HorizontalAlignment','center','Units','normalized')
     text(tone_text_loc,1.01,'tone','HorizontalAlignment','center','Units','normalized')
+    % set yaxis ticks
+    set(gca,'yTick', fliplr(3820:-1000:0));
+    set(gca,'yTickLabel', fliplr(0:1000:3820));
+    % set title and axes
+    title(probe_list(p),'Units', 'normalized','Position',[0.5 1.05 0]) 
     xlabel('Time (seconds)')
-    ylabel('Unit')
-end
-
+    ylabel('Depth (\mum)')
 end
