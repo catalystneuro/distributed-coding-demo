@@ -13,7 +13,7 @@ feedback_time = nwb_file.intervals_trials.vectordata.get('feedback_time').data(t
 
 % time details for raster plots
 before_time = 0;
-after_time = 1 +feedback_time;
+after_time = 0.25 +feedback_time;
 
 %%% Electrode details
 probe_list = keys(nwb_file.general_extracellular_ephys.map);
@@ -42,18 +42,9 @@ depth_unit = depth_all(valid_units);
 probe_unit = probe_all(valid_units);
 area_unit = electrode_area(channel_all(valid_units));
 
-% get raster data
-raster_data = {};
-for n = 1:num_units
-    % get spike times
-    spike_times = util.read_indexed_column(nwb_file.units.spike_times_index, ...
-                                           nwb_file.units.spike_times, ...
-                                           valid_units(n));
-    raster_data{end+1} = spike_times(...
-                       spike_times >= trial_start_time + before_time & ...
-                       spike_times <= trial_start_time + after_time) - ...
-                       trial_start_time;
-end
+% fetch raster data
+raster_data = get_spike_raster(nwb_file, valid_units, ...
+    trial_start_time, before_time, after_time);
 
 %%% Make figure
 % list areas
@@ -112,10 +103,42 @@ for i =1:num_areas
 end
 legend(h, area_list,'Location','southoutside','Orientation','Horizontal');
 end
+
 function idx = probePathToIdx(probe_path, probe_list)
 slash_idx = find(probe_path=='/');
 probe = probe_path(slash_idx(end)+1:end);
 idxC = strfind(probe_list,probe);
 idx = find(not(cellfun('isempty',idxC)));
 end 
+
+function raster_data = get_spike_raster(nwb_file, valid_units, ...
+    trial_start_time, before_time, after_time)
+
+% read-in all spike times data, minimize I/O for performance
+try
+    index_data = nwb_file.units.spike_times_index.data.load(:);
+    time_data = nwb_file.units.spike_times.data.load(:);
+catch
+    index_data = nwb_file.units.spike_times_index.data(:);
+    time_data = nwb_file.units.spike_times.data(:);
+end
+% format ragged rows properly, limit spike times to desired period
+raster_data = cell(length(valid_units),1);
+for i = 1:length(valid_units)
+    upper_bound = index_data(valid_units(i));
+    if valid_units(i)==1
+        lower_bound = 1;
+    else
+        lower_bound = index_data(valid_units(i)-1)+1;
+    end
+    spike_times = time_data(lower_bound:upper_bound);
+    raster_data{i} = spike_times(...
+                       spike_times >= trial_start_time + before_time & ...
+                       spike_times <= trial_start_time + after_time) - ...
+                       trial_start_time;
+end
+end
+
+
+
 
