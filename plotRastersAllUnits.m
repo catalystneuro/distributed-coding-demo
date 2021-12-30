@@ -1,6 +1,16 @@
 function plotRastersAllUnits(nwb_file, trial)
-
-%trial timing details; 
+% PLOTRASTERSALLUNITS plots raster plots for all valid units for the
+% indicated trial from the provided NWB file. Valid units exclude 
+% multi-unit activity and noise, in line with Steinmetz et al., 2019.
+% PLOTRASTERSALLUNITS(NWB, TRIAL) Produces a plot with the following
+% features:
+%   - Different subplots for different recording probes
+%   - Row location reflects recorded unit depth
+%   - Row color reflects brain region of provenance for recorded unit
+%   - Vertical line markers for relevant trial events (stim, tone, move,
+%       feedback)
+%
+% Trial timing details
 trial_start_time = nwb_file.intervals_trials.start_time.data(trial);
 % stim
 stim_time = nwb_file.intervals_trials.vectordata.get('visual_stimulus_time').data(trial) - trial_start_time;
@@ -10,17 +20,14 @@ response_time = nwb_file.intervals_trials.vectordata.get('response_time').data(t
 tone_time = nwb_file.intervals_trials.vectordata.get('go_cue').data(trial) - trial_start_time;
 % reward
 feedback_time = nwb_file.intervals_trials.vectordata.get('feedback_time').data(trial) - trial_start_time;
-
 % time details for raster plots
 before_time = 0;
 after_time = 0.25 +feedback_time;
-
 %%% Electrode details
 probe_list = keys(nwb_file.general_extracellular_ephys.map);
 nprobes = length(probe_list);
 % electrode location
 electrode_area = nwb_file.general_extracellular_ephys_electrodes.vectordata.get('location').data(:);
-
 %%% All unit/cluster details
 % get cluster annotations
 annot = nwb_file.units.vectordata.get('phy_annotations').data(:);
@@ -36,16 +43,13 @@ probe_all = arrayfun( ...
 channel_all = nwb_file.units.vectordata.get('peak_channel').data(:);
 % cluster depth (0 = deepest, 3820 = shallowest; scale um)
 depth_all = nwb_file.units.vectordata.get('cluster_depths').data(:);
-
 % get details for valid units
 depth_unit = depth_all(valid_units);
 probe_unit = probe_all(valid_units);
 area_unit = electrode_area(channel_all(valid_units));
-
 % fetch raster data
 raster_data = get_spike_raster(nwb_file, valid_units, ...
     trial_start_time, before_time, after_time);
-
 %%% Make figure
 % list areas
 area_list = unique(area_unit);
@@ -58,7 +62,6 @@ palette = hsv2rgb(palette);
 % depth details
 min_depth = 0;%microns
 max_depth = 3820;% microns
-
 figure;
 for p = 1:nprobes
     probe_idxs = find(probe_unit==p);
@@ -103,17 +106,9 @@ for i =1:num_areas
 end
 legend(h, area_list,'Location','southoutside','Orientation','Horizontal');
 end
-
-function idx = probePathToIdx(probe_path, probe_list)
-slash_idx = find(probe_path=='/');
-probe = probe_path(slash_idx(end)+1:end);
-idxC = strfind(probe_list,probe);
-idx = find(not(cellfun('isempty',idxC)));
-end 
-
 function raster_data = get_spike_raster(nwb_file, valid_units, ...
     trial_start_time, before_time, after_time)
-
+% Get spike time data for all valid units
 % read-in all spike times data, minimize I/O for performance
 try
     index_data = nwb_file.units.spike_times_index.data.load(:);
