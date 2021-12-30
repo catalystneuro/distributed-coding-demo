@@ -1,6 +1,4 @@
 function unit_info = getUnitInfo(nwb_file)
-% create empty structure
-unit_info = struct;
 %%% Electrode details
 probe_list = keys(nwb_file.general_extracellular_ephys.map);
 % electrode location
@@ -9,7 +7,7 @@ electrode_area = nwb_file.general_extracellular_ephys_electrodes.vectordata.get(
 % get cluster annotations
 annot = nwb_file.units.vectordata.get('phy_annotations').data(:);
 % exclude MUA and noise (as in Steinmetz et al 2019 paper)
-unit_info.valid_units = find(annot>=2);
+valid_units = find(annot>=2);
 % recording probe
 probe_all = arrayfun( ...
     @(x) probePathToIdx(x.path, probe_list), ...
@@ -18,16 +16,18 @@ probe_all = arrayfun( ...
 % cluster channel
 channel_all = nwb_file.units.vectordata.get('peak_channel').data(:);
 % cluster depth (0 = deepest, 3820 = shallowest; scale um)
-depth_all = nwb_file.units.vectordata.get('cluster_depths').data(:);
+depth_all = nwb_file.units.vectordata.get('cluster_depths').data(:)';
 
 % get details for valid units
-unit_info.depth_valid = depth_all(unit_info.valid_units);
-unit_info.probe_valid = probe_all(unit_info.valid_units);
-unit_info.area_valid = electrode_area(channel_all(unit_info.valid_units));
+depth_valid = depth_all(valid_units);
+probe_valid = probe_all(valid_units);
+area_valid = electrode_area(channel_all(valid_units));
+% create structure
+unit_info = struct( ...
+    'original_id', num2cell(valid_units), ...
+    'depth', num2cell(depth_valid), ...
+    'probe', num2cell(probe_valid), ...
+    'area', area_valid ...
+);
 end
-function idx = probePathToIdx(probe_path, probe_list)
-slash_idx = find(probe_path=='/');
-probe = probe_path(slash_idx(end)+1:end);
-idxC = strfind(probe_list,probe);
-idx = find(not(cellfun('isempty',idxC)));
-end
+    
