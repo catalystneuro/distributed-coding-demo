@@ -90,7 +90,10 @@ for p = 1:nprobes
     text(tone_text_loc,1.01,'tone','HorizontalAlignment','center','Units','normalized')
     
     % set yaxis ticks
-    set(gca,'yTick', fliplr(3820:-1000:0));
+    % ticks and labels must be flipped because:
+    %   1) depth = 0 is deepest; depth = 3820 = most superficial
+    %   2) top of probe should go at top of plot
+    set(gca,'yTick', fliplr(3820:-1000:0)); 
     set(gca,'yTickLabel', fliplr(0:1000:3820));
     % set title and axes
     title(probe_list(p),'Units', 'normalized','Position',[0.5 1.05 0]) 
