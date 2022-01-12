@@ -4,8 +4,13 @@ This repo contains MATLAB live scripts for interactive visualization of data fro
 
 Joint project with Mathworks
 
-Resources:
-* NWB dandi-set [here](https://dandiarchive.org/dandiset/000017/draft)
+## Setup
+
+* [Download MatNWB](https://github.com/NeurodataWithoutBorders/matnwb) and add to MATLAB search path.
+
+* [Download distributed-coding-matnwb repo](https://github.com/catalystneuro/distributed-coding-matnwb) and add to MATLAB search path.
+
+* Download NWB dandi-set [here](https://dandiarchive.org/dandiset/000017/draft).
 
 ## Exploring trial-specific responses of all neurons recorded within a session 
 
