@@ -1,6 +1,6 @@
 # distributed-coding-demo
 
-This repo contains MATLAB live scripts for interactive visualization of data from Steinmetz et al., (2019): [Distributed coding of choice, action and engagement across the mouse brain](https://www.nature.com/articles/s41586-019-1787-x). These data contain electrophysiological recordings of neuronal activity across the mouse brain while the animals are engaged in a perceptual decision-making task. Data is aggregated across multiple [Neuropixel probes](https://www.ucl.ac.uk/neuropixels/) inserted at various brain locations across multiple animals.
+This repo contains MATLAB live scripts for interactive visualization of data from Steinmetz et al., (2019): [Distributed coding of choice, action and engagement across the mouse brain](https://www.nature.com/articles/s41586-019-1787-x)[1]. These data contain electrophysiological recordings of neuronal activity across the mouse brain while the animals are engaged in a perceptual decision-making task. Data is aggregated across multiple [Neuropixel probes](https://www.ucl.ac.uk/neuropixels/) inserted at various brain locations across multiple animals.
 
 Joint project with Mathworks
 
@@ -27,3 +27,4 @@ Joint project with Mathworks
 **Sample plot:** 
 <img src="./sample_plots/singleNeuronRaster.png" width = "560" height = "420">
 
+[1] Steinmetz, N. A., Zatka-Haas, P., Carandini, M., & Harris, K. D. (2019). Distributed coding of choice, action and engagement across the mouse brain. Nature, 576(7786), 266-273.
